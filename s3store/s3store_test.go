@@ -3,10 +3,11 @@ package s3store_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
