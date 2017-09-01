@@ -159,6 +159,7 @@ func TestCalcOptimalPartSize_ExceedingMaxPartSize(t *testing.T) {
 
 	size := store.MaxPartSize*store.MaxMultipartParts + 1
 
-	_, err := store.calcOptimalPartSize(size)
-	assert.Error(err, "calcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v")
+	optimalPartSize, err := store.calcOptimalPartSize(size)
+	assert.NotNil(err)
+	assert.EqualError(err, fmt.Sprintf("calcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v", size, optimalPartSize, store.MaxPartSize))
 }
