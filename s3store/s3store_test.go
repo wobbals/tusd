@@ -1,4 +1,4 @@
-package s3store_test
+package s3store
 
 import (
 	"bytes"
@@ -13,17 +13,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/tus/tusd"
-	"github.com/tus/tusd/s3store"
 )
 
-//go:generate mockgen -destination=./s3store_mock_test.go -package=s3store_test github.com/tus/tusd/s3store S3API
+//go:generate mockgen -destination=./s3store_mock_test.go -package=s3store github.com/tus/tusd/s3store S3API
 
 // Test interface implementations
-var _ tusd.DataStore = s3store.S3Store{}
-var _ tusd.GetReaderDataStore = s3store.S3Store{}
-var _ tusd.TerminaterDataStore = s3store.S3Store{}
-var _ tusd.FinisherDataStore = s3store.S3Store{}
-var _ tusd.ConcaterDataStore = s3store.S3Store{}
+var _ tusd.DataStore = S3Store{}
+var _ tusd.GetReaderDataStore = S3Store{}
+var _ tusd.TerminaterDataStore = S3Store{}
+var _ tusd.FinisherDataStore = S3Store{}
+var _ tusd.ConcaterDataStore = S3Store{}
 
 func TestNewUpload(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
@@ -31,7 +30,7 @@ func TestNewUpload(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	assert.Equal("bucket", store.Bucket)
 	assert.Equal(s3obj, store.Service)
@@ -78,7 +77,7 @@ func TestNewUploadLargerMaxObjectSize(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	assert.Equal("bucket", store.Bucket)
 	assert.Equal(s3obj, store.Service)
@@ -100,7 +99,7 @@ func TestGetInfoNotFound(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	s3obj.EXPECT().GetObject(&s3.GetObjectInput{
 		Bucket: aws.String("bucket"),
@@ -117,7 +116,7 @@ func TestGetInfo(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().GetObject(&s3.GetObjectInput{
@@ -172,7 +171,7 @@ func TestGetInfoFinished(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().GetObject(&s3.GetObjectInput{
@@ -201,7 +200,7 @@ func TestGetReader(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	s3obj.EXPECT().GetObject(&s3.GetObjectInput{
 		Bucket: aws.String("bucket"),
@@ -221,7 +220,7 @@ func TestGetReaderNotFound(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().GetObject(&s3.GetObjectInput{
@@ -247,7 +246,7 @@ func TestGetReaderNotFinished(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().GetObject(&s3.GetObjectInput{
@@ -275,7 +274,7 @@ func TestFinishUpload(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().ListParts(&s3.ListPartsInput{
@@ -346,7 +345,7 @@ func TestWriteChunk(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 	store.MaxPartSize = 8
 	store.MinPartSize = 4
 	store.MaxMultipartParts = 10000
@@ -425,7 +424,7 @@ func TestWriteChunkDropTooSmall(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	gomock.InOrder(
 		s3obj.EXPECT().GetObject(&s3.GetObjectInput{
@@ -477,7 +476,7 @@ func TestWriteChunkAllowTooSmallLast(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 	store.MinPartSize = 20
 
 	gomock.InOrder(
@@ -540,7 +539,7 @@ func TestTerminate(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	// Order is not important in this situation.
 	s3obj.EXPECT().AbortMultipartUpload(&s3.AbortMultipartUploadInput{
@@ -574,7 +573,7 @@ func TestTerminateWithErrors(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	// Order is not important in this situation.
 	// NoSuchUpload errors should be ignored
@@ -617,7 +616,7 @@ func TestConcatUploads(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	s3obj.EXPECT().UploadPartCopy(&s3.UploadPartCopyInput{
 		Bucket:     aws.String("bucket"),

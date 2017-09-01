@@ -1,4 +1,4 @@
-package s3store_test
+package s3store
 
 import (
 	"fmt"
@@ -6,13 +6,12 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/tus/tusd/s3store"
 )
 
 const enableTestDebugOutput = false
 
-func assertCalculatedPartSize(store s3store.S3Store, assert *assert.Assertions, size int64) {
-	optimalPartSize, err := store.CalcOptimalPartSize(size)
+func assertCalculatedPartSize(store S3Store, assert *assert.Assertions, size int64) {
+	optimalPartSize, err := store.calcOptimalPartSize(size)
 	assert.Nil(err, "Size %d, no error should be returned.\n", size)
 
 	// Number of parts with the same size
@@ -41,7 +40,7 @@ func TestCalcOptimalPartSize(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	// If you quickly want to override the default values in this test
 	/*
@@ -133,7 +132,7 @@ func TestCalcOptimalPartSize_AllUploadSizes(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	store.MinPartSize = 5
 	store.MaxPartSize = 5 * 1024
@@ -156,10 +155,10 @@ func TestCalcOptimalPartSize_ExceedingMaxPartSize(t *testing.T) {
 	assert := assert.New(t)
 
 	s3obj := NewMockS3API(mockCtrl)
-	store := s3store.New("bucket", s3obj)
+	store := New("bucket", s3obj)
 
 	size := store.MaxPartSize*store.MaxMultipartParts + 1
 
-	_, err := store.CalcOptimalPartSize(size)
-	assert.Error(err, "CalcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v")
+	_, err := store.calcOptimalPartSize(size)
+	assert.Error(err, "calcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v")
 }

@@ -238,7 +238,7 @@ func (store S3Store) WriteChunk(id string, offset int64, src io.Reader) (int64, 
 
 	size := info.Size
 	bytesUploaded := int64(0)
-	optimalPartSize, err := store.CalcOptimalPartSize(size)
+	optimalPartSize, err := store.calcOptimalPartSize(size)
 	if err != nil {
 		return bytesUploaded, err
 	}
@@ -566,7 +566,7 @@ func isAwsError(err error, code string) bool {
 	return false
 }
 
-func (store S3Store) CalcOptimalPartSize(size int64) (optimalPartSize int64, err error) {
+func (store S3Store) calcOptimalPartSize(size int64) (optimalPartSize int64, err error) {
 	switch {
 	// When upload is smaller or equal MinPartSize, we upload in just one part.
 	case size <= store.MinPartSize:
@@ -605,7 +605,7 @@ func (store S3Store) CalcOptimalPartSize(size int64) (optimalPartSize int64, err
 
 	// optimalPartSize must never exceed MaxPartSize
 	if optimalPartSize > store.MaxPartSize {
-		return optimalPartSize, fmt.Errorf("CalcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v", size, optimalPartSize, store.MaxPartSize)
+		return optimalPartSize, fmt.Errorf("calcOptimalPartSize: to upload %v bytes optimalPartSize %v must exceed MaxPartSize %v", size, optimalPartSize, store.MaxPartSize)
 	}
 	return optimalPartSize, nil
 }
