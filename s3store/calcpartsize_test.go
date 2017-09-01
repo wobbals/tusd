@@ -9,6 +9,8 @@ import (
 	"github.com/tus/tusd/s3store"
 )
 
+const enableTestDebugOutput = false
+
 func assertCalculatedPartSize(store s3store.S3Store, assert *assert.Assertions, size int64) {
 	optimalPartSize, err := store.CalcOptimalPartSize(size)
 	assert.Nil(err, "Size %d, no error should be returned.\n", size)
@@ -28,7 +30,7 @@ func assertCalculatedPartSize(store s3store.S3Store, assert *assert.Assertions, 
 	assert.False(lastpartSize > optimalPartSize, prelude+"lastpart > optimalPartSize %d.\n", optimalPartSize)
 	assert.True(size <= optimalPartSize*store.MaxMultipartParts, prelude+"upload does not fit in %d parts.\n", store.MaxMultipartParts)
 
-	if false {
+	if enableTestDebugOutput {
 		fmt.Printf(prelude+"does exceed MaxObjectSize: %t.\n", size > store.MaxObjectSize)
 	}
 }
@@ -115,8 +117,11 @@ func TestCalcOptimalPartSize(t *testing.T) {
 	for _, size := range testcases {
 		assertCalculatedPartSize(store, assert, size)
 	}
-	// fmt.Println("HighestApplicablePartSize", HighestApplicablePartSize)
-	// fmt.Println("RemainderWithHighestApplicablePartSize", RemainderWithHighestApplicablePartSize)
+
+	if enableTestDebugOutput {
+		fmt.Println("HighestApplicablePartSize", HighestApplicablePartSize)
+		fmt.Println("RemainderWithHighestApplicablePartSize", RemainderWithHighestApplicablePartSize)
+	}
 }
 
 func TestCalcOptimalPartSize_AllUploadSizes(t *testing.T) {
