@@ -22,7 +22,7 @@ env:
   global:
   - GO111MODULE=on
 install:
-- get get ./...
+- go get ./...
 script:
 - ./.scripts/test_all.sh
 before_deploy:
