@@ -1,3 +1,5 @@
+// +build go1.9
+
 package etcd3locker
 
 import (
