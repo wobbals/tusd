@@ -22,8 +22,8 @@ install_etcd() {
 
 while read package; do
   echo "Testing package $package"
-  go get -t $package
-  go test $package
+  go get -v -t $package
+  go test -v $package
   go vet $package
   echo
 done <<< "$packages"
