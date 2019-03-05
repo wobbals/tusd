@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/tus/tusd"
-	"go.etcd.io/etcd/clientv3/concurrency"
+	"github.com/coreos/etcd/clientv3/concurrency"
 )
 
 type etcd3Lock struct {
