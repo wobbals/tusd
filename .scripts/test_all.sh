@@ -22,7 +22,7 @@ install_etcd() {
 
 while read package; do
   echo "Testing package $package"
-  go get $package
+  go get $package/...
   go test $package
   go vet $package
   echo
