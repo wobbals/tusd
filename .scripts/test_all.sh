@@ -21,10 +21,9 @@ install_etcd() {
 (echo "$packages" | grep etcd3locker > /dev/null) && install_etcd
 
 while read package; do
-  dir="${package/'github.com/tus/tusd'/.}"
-  echo "Testing package $package ($dir):"
-  go get -v -t "$dir"
-  go test -v "$dir"
-  go vet "$dir"
+  echo "Testing package $package:"
+  go get -v -t "$package"
+  go test -v "$package"
+  go vet "$package"
   echo
 done <<< "$packages"
