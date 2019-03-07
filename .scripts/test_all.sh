@@ -6,7 +6,7 @@ set -o pipefail
 # Find all packages containing Go test files. If a package does not contain test files
 # (or the test files are excluded because of their build tags), it will not be
 # included in this list.
-packages=$(go list -f '{{.ImportPath}} {{.XTestGoFiles}} {{.TestGoFiles}}' ./... | grep -v '\[\] \[\]' | cut -f 1 -d " ")
+packages=$(go list -f '{{.Dir}}: {{.XTestGoFiles}} {{.TestGoFiles}}' ./... | grep -v '\[\] \[\]' | cut -f 1 -d ":")
 
 install_etcd() {
   ETCD_VERSION="3.3.10"
