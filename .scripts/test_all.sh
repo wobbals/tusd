@@ -21,9 +21,10 @@ install_etcd() {
 (echo "$packages" | grep etcd3locker > /dev/null) && install_etcd
 
 while read package; do
-  echo "Testing package $package"
-  go get -v -t $package
-  go test -v $package
-  go vet $package
+  dir="./$(realpath --relative-to="$PWD" "$package")"
+  echo "Testing package $package ($dir)..."
+  go get -v -t "$dir"
+  go test -v "$dir"
+  go vet "$dir"
   echo
 done <<< "$packages"
