@@ -6,7 +6,7 @@ set -o pipefail
 # Find all packages containing Go test files. If a package does not contain test files
 # (or the test files are excluded because of their build tags), it will not be
 # included in this list.
-packages=$(go list -f '{{.Dir}}: {{.XTestGoFiles}} {{.TestGoFiles}}' ./... | grep -v '\[\] \[\]' | cut -f 1 -d ":")
+packages=$(go list -f '{{.ImportPath}}: {{.XTestGoFiles}} {{.TestGoFiles}}' ./... | grep -v '\[\] \[\]' | cut -f 1 -d ":")
 
 install_etcd() {
   ETCD_VERSION="3.3.10"
@@ -21,8 +21,8 @@ install_etcd() {
 (echo "$packages" | grep etcd3locker > /dev/null) && install_etcd
 
 while read package; do
-  dir="./$(realpath --relative-to="$PWD" "$package")"
-  echo "Testing package $package ($dir)..."
+  dir="${package/'github.com/tus/tusd'/.}"
+  echo "Testing package $package ($dir):"
   go get -v -t "$dir"
   go test -v "$dir"
   go vet "$dir"
